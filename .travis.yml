@@ -11,4 +11,4 @@ script:
  - make
  - make test
  - make install
- - test -f ../target/kdm.h
+ - test -f ../target/install/kdm.h
