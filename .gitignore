@@ -1,6 +1,7 @@
 *.swp
 
-build # default build-dir name
+# default build-dir name
+build
 tags
 
 # Object files
