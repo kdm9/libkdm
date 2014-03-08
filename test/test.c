@@ -35,9 +35,11 @@ static int kdm_test_err = 0;
 static const unsigned char *zeros[NUM_ZEROS];
 
 void
-tst_err_handler(int err)
+tst_err_handler(int err, char *f, int l)
 {
     kdm_test_err = err;
+    (void) (f);
+    (void) (l);
 }
 
 void

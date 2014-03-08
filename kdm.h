@@ -76,16 +76,18 @@ const char *kdm_err_msgs[] = {
 
 /* Valid non-function to pass to libkdm functions */
 void
-km_onerr_nil(int err)
+km_onerr_nil(int err, char *file, int line)
 {
     (void) (err);
+    (void) (file);
+    (void) (line);
 }
 
 /* Valid non-function to pass to libkdm functions */
 void
-km_onerr_print(int err)
+km_onerr_print(int err, char *file, int line)
 {
-    (void) (err);
+    fprintf(stderr, "[%s: %d] %d: %s\n", file, line, err, kdm_err_msgs[err]);
 }
 
 /*
@@ -93,40 +95,43 @@ km_onerr_print(int err)
  */
 
 inline void *
-km_calloc(size_t n, size_t size, void (*onerr)(int))
+km_calloc_(size_t n, size_t size, void (*onerr)(int, char *, int), char *file, int line)
 {
     void * ret = calloc(n, size);
     if (ret == NULL) {
-        (*onerr)(1);
+        (*onerr)(1, file, line);
         return NULL;
     } else {
         return ret;
     }
 }
+#define km_calloc(n, sz, fn) km_calloc_(n, sz, fn, __FILE__, __LINE__)
 
 inline void *
-km_malloc(size_t size, void (*onerr)(int))
+km_malloc_(size_t size, void (*onerr)(int, char *, int), char *file, int line)
 {
     void * ret = malloc(size);
     if (ret == NULL) {
-        (*onerr)(1);
+        (*onerr)(1, file, line);
         return NULL;
     } else {
         return ret;
     }
 }
+#define km_malloc(sz, fn) km_malloc_(sz, fn, __FILE__, __LINE__)
 
 inline void *
-km_realloc(void *data, size_t size, void (*onerr)(int))
+km_realloc_(void *data, size_t size, void (*onerr)(int, char *, int), char *file, int line)
 {
     void * ret = realloc(data, size);
     if (ret == NULL) {
-        (*onerr)(1);
+        (*onerr)(1, file, line);
         return NULL;
     } else {
         return ret;
     }
 }
+#define km_realloc(ptr, sz, fn) km_realloc_(ptr, sz, fn, __FILE__, __LINE__)
 
 #define km_free(data, onerr)        \
     STMT_BEGIN                      \
