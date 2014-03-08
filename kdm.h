@@ -52,8 +52,6 @@
 #define STMT_END } while (0)
 #endif
 
-
-
 /*
  * Error handling constants
  */
@@ -61,7 +59,7 @@
 #define KDM_ERR_ALLOC 1<<0
 #define KDM_ERR_FREE 1<<1
 
-const char *kdm_err_msgs[] = {
+const char *km_err_msgs[] = {
     "No Error",
     "Could not allocate memory",
     "Could not free memory",
@@ -87,7 +85,7 @@ km_onerr_nil(int err, char *file, int line)
 void
 km_onerr_print(int err, char *file, int line)
 {
-    fprintf(stderr, "[%s: %d] %d: %s\n", file, line, err, kdm_err_msgs[err]);
+    fprintf(stderr, "[%s: %d] %d: %s\n", file, line, err, km_err_msgs[err]);
 }
 
 /*
