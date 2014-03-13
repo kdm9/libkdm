@@ -59,7 +59,7 @@
 #define KDM_ERR_ALLOC 1<<0
 #define KDM_ERR_FREE 1<<1
 
-const char *km_err_msgs[] = {
+static const char *km_err_msgs[] = {
     "No Error",
     "Could not allocate memory",
     "Could not free memory",
@@ -73,7 +73,7 @@ const char *km_err_msgs[] = {
 
 
 /* Valid non-function to pass to libkdm functions */
-void
+static void
 km_onerr_nil(int err, char *file, int line)
 {
     (void) (err);
@@ -82,7 +82,7 @@ km_onerr_nil(int err, char *file, int line)
 }
 
 /* Valid non-function to pass to libkdm functions */
-void
+static void
 km_onerr_print(int err, char *file, int line)
 {
     fprintf(stderr, "[%s: %d] %d: %s\n", file, line, err, km_err_msgs[err]);
@@ -92,7 +92,7 @@ km_onerr_print(int err, char *file, int line)
  * Memory allocation/deallocation
  */
 
-inline void *
+static inline void *
 km_calloc_(size_t n, size_t size, void (*onerr)(int, char *, int), char *file, int line)
 {
     void * ret = calloc(n, size);
@@ -105,7 +105,7 @@ km_calloc_(size_t n, size_t size, void (*onerr)(int, char *, int), char *file, i
 }
 #define km_calloc(n, sz, fn) km_calloc_(n, sz, fn, __FILE__, __LINE__)
 
-inline void *
+static inline void *
 km_malloc_(size_t size, void (*onerr)(int, char *, int), char *file, int line)
 {
     void * ret = malloc(size);
@@ -118,7 +118,7 @@ km_malloc_(size_t size, void (*onerr)(int, char *, int), char *file, int line)
 }
 #define km_malloc(sz, fn) km_malloc_(sz, fn, __FILE__, __LINE__)
 
-inline void *
+static inline void *
 km_realloc_(void *data, size_t size, void (*onerr)(int, char *, int), char *file, int line)
 {
     void * ret = realloc(data, size);
