@@ -26,18 +26,25 @@
 #include <unistd.h>
 #endif
 
-#include "kdm.h"
+/* TinyTest */
 #include "tinytest.h"
 #include "tinytest_macros.h"
+/* libkdm */
+#include "kdm.h"
+#include "testdata.h"
 
-static int kdm_test_err = 0;
+/* Constants */
 #define NUM_ZEROS 1<<10
 static const unsigned char *zeros[NUM_ZEROS];
 
+
+static int km_test_err = 0;
+static char *km_test_err_msg;
 void
-tst_err_handler(int err, char *f, int l)
+test_err_handler(int err, char *msg,  char *f, int l)
 {
-    kdm_test_err = err;
+    km_test_err = err;
+    km_test_err_msg = msg;
     (void) (f);
     (void) (l);
 }
@@ -53,9 +60,9 @@ test_km_calloc(void *ptr)
     free(res);
 
     /* This should fail */
-    res = km_calloc(SIZE_MAX, 1, &tst_err_handler);
+    res = km_calloc(SIZE_MAX, 1, &test_err_handler);
     tt_ptr_op(res, ==, NULL);
-    tt_int_op(kdm_test_err, ==, 1);
+    tt_int_op(km_test_err, ==, 1);
 
 end:
     if (res != NULL) free(res);
@@ -72,9 +79,9 @@ test_km_malloc(void *ptr)
     free(res);
 
     /* This should fail */
-    res = km_malloc(SIZE_MAX, &tst_err_handler);
+    res = km_malloc(SIZE_MAX, &test_err_handler);
     tt_ptr_op(res, ==, NULL);
-    tt_int_op(kdm_test_err, ==, 1);
+    tt_int_op(km_test_err, ==, 1);
 
 end:
     if (res != NULL) free(res);
@@ -92,9 +99,9 @@ test_km_realloc(void *ptr)
     tt_int_op(memcmp(res, dat, 5), ==, 0);
     free(res);
     /* This should fail */
-    res = km_realloc(dat, SIZE_MAX, &tst_err_handler);
+    res = km_realloc(dat, SIZE_MAX, &test_err_handler);
     tt_ptr_op(res, ==, NULL);
-    tt_int_op(kdm_test_err, ==, 1);
+    tt_int_op(km_test_err, ==, 1);
 end:
     if (res != NULL) free(res);
     ;
