@@ -36,7 +36,17 @@
 /* Constants */
 #define NUM_ZEROS 1<<10
 static const unsigned char *zeros[NUM_ZEROS];
+static const char *test_data_dir = "." km_pathsep "data";
+static const size_t bufsize = 1<<10;
 
+char *
+get_test_filename (const char* file)
+{
+    char * ret = calloc(bufsize, sizeof(*ret));
+    int len = snprintf(ret, bufsize, "%s" km_pathsep "%s", test_data_dir, file);
+    if (len > 0 && len < bufsize) return ret;
+    else return NULL;
+}
 
 static int km_test_err = 0;
 static char *km_test_err_msg;
@@ -172,6 +182,89 @@ end:
     ;
 }
 
+void
+test_km_readline_realloc (void *ptr)
+{
+    char *lorem_fn = NULL;
+    char *buf = NULL;
+    char *smallbuf = NULL;
+    const size_t smallbuf_len = 1<<4;
+    FILE *fp = NULL;
+    ssize_t ret = 0;
+    size_t line_num;
+    char *nulcp = NULL;
+    FILE *nulfp = NULL;
+    char *tmpcp = NULL;
+    size_t tmpsz = 0;
+    size_t our_bufsize = bufsize;
+    size_t our_smallbuf_len = smallbuf_len;
+    km_test_err = 0;
+    /* This should always work, so long as you run it from the right dir */
+    lorem_fn = get_test_filename("loremipsum.txt");
+    if (lorem_fn == NULL)
+        tt_abort_msg("Broken test - get_test_filename failed\n");
+    if ((fp = fopen(lorem_fn, "r")) == NULL) {
+        fprintf(stderr, "Could not open test file '%s' -- %s\n",
+                lorem_fn, strerror(errno));
+        tt_skip();
+    } else {
+        buf = calloc(our_bufsize, sizeof(*buf));
+        smallbuf = calloc(our_smallbuf_len, sizeof(*smallbuf));
+    }
+    for (line_num = 0; line_num < n_loremipsum_lines; line_num++) {
+        ret = km_readline_realloc(buf, fp, &our_bufsize, &test_err_handler);
+        tt_int_op(km_test_err, ==, 0);
+        tt_int_op(strncmp(buf, loremipsum_lines[line_num], our_bufsize), ==, 0);
+        tt_int_op(strlen(buf), ==, loremipsum_line_lens[line_num]);
+        tt_int_op(ret, ==, loremipsum_line_lens[line_num]);
+        tt_int_op(our_bufsize, ==, bufsize);
+        km_test_err = 0;
+    }
+    ret = km_readline_realloc(buf, fp, &our_bufsize, &test_err_handler);
+    tt_int_op(km_test_err, ==, 0);
+    /* check it leaves  \0 in buf */
+    tt_int_op(strncmp(buf, "", our_bufsize), ==, 0);
+    tt_int_op(strlen(buf), ==, 0);
+    tt_int_op(ret, ==, EOF);
+    tt_int_op(our_bufsize, ==, bufsize);
+    km_test_err = 0;
+    /* Naughty tests that try and make it fail */
+    rewind(fp);
+    /* Null buf */
+    ret = km_readline_realloc(nulcp, fp, &our_bufsize, &test_err_handler);
+    tt_int_op(km_test_err, ==, 3);
+    tt_int_op(ret, ==, -2);
+    tt_int_op(our_bufsize, ==, bufsize);
+    km_test_err = 0;
+    /* Null fp */
+    ret = km_readline_realloc(buf, nulfp, &our_bufsize, &test_err_handler);
+    tt_int_op(km_test_err, ==, 3);
+    tt_int_op(ret, ==, -2);
+    tt_int_op(our_bufsize, ==, bufsize);
+    km_test_err = 0;
+    /* Both buf & fp null */
+    ret = km_readline_realloc(nulcp, nulfp, &our_bufsize, &test_err_handler);
+    tt_int_op(km_test_err, ==, 3);
+    tt_int_op(ret, ==, -2);
+    tt_int_op(our_bufsize, ==, bufsize);
+    km_test_err = 0;
+    /* Test that should require it to resize the buffer */
+    rewind(fp);
+    ret = km_readline_realloc(smallbuf, fp, &our_smallbuf_len,
+            &test_err_handler);
+    tt_int_op(km_test_err, ==, 0);
+    tt_int_op(ret, ==, loremipsum_line_lens[0]);
+    tt_int_op(strlen(smallbuf), ==, loremipsum_line_lens[0]);
+    tmpsz = loremipsum_line_lens[0];
+    tt_int_op(our_smallbuf_len, ==, kmroundupz(tmpsz));
+end:
+    if (lorem_fn != NULL) free(lorem_fn);
+    if (buf != NULL) free(buf);
+    if (smallbuf != NULL) free(smallbuf);
+    if (fp != NULL) fclose(fp);
+}
+
+
 /* List of tests. Don't forget to update this.
    Format is:
    { name, fn, flags, testcase_setup_t *ptr, void * for testcase_setup_t }
@@ -183,6 +276,7 @@ struct testcase_t tests[] = {
     { "km_free", test_km_free,},
     { "kmroundup32", test_kmroundup32,},
     { "kmroundup64", test_kmroundup64,},
+    { "km_readline_realloc", test_km_readline_realloc,},
     END_OF_TESTCASES
 };
 

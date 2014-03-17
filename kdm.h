@@ -192,4 +192,36 @@ km_realloc_ (void *data, size_t size, void (*onerr)(int, char *, char *, int),
 #define kmroundupz kmroundup32
 #endif
 
+/*
+ * IO routines
+ */
+
+/* Zero-copy `getline()`, with the added benefit of `realloc`-ing `buf` to
+    the next highest base-2 power, if we run out of space. If it is realloced,
+    (*size) is updated to the right size.
+    DON'T USE ON STACK BUFFERS.
+*/
+static inline ssize_t
+km_readline_realloc_ (char *buf, FILE *fp, size_t *size,
+              void (*onerr)(int, char *, char *, int), char *file, int line)
+{
+    if (buf == NULL || fp == NULL) {
+        (*onerr)(3, NULL, file, line);
+        return -2; /* EOF is normally == -1, so use -2 to differentiate them */
+    }
+    size_t len = 0;
+    while((buf[len] = fgetc(fp)) != EOF && buf[len++] != '\n') {
+        if (len + 1 >= (*size) - 1) {
+            (*size) = kmroundupz(*size);
+            char * newbuf = km_realloc(buf, sizeof(*buf) * (*size), onerr);
+            buf = newbuf;
+        }
+    }
+    buf[len] = '\0';
+    if (feof(fp)) return EOF;
+    else return len;
+}
+#define km_readline_realloc(buf, fp, sz, fn) \
+    km_readline_realloc_(buf, fp, sz, fn, __FILE__, __LINE__)
+
 #endif /* KDM_H */
