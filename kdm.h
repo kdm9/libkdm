@@ -23,24 +23,33 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
-#ifndef _WIN32
+
+
+/*
+ * Cross-platform bollocks. Thanks windows.
+ */
+
+#if defined(WIN32) || defined(_WIN32)
+#include <windows.h>
+#define km_pathsep "\\"
+#else
+#define km_pathsep "/"
 #include <unistd.h>
 #endif
-
 
 /*
  * Macro helpers from tor
  */
 
-/** Expands to a syntactically valid empty statement.  */
+/* Expands to a syntactically valid empty statement.  */
 #define STMT_NIL (void)0
 
-/** Expands to a syntactically valid empty statement, explicitly (void)ing its
+/* Expands to a syntactically valid empty statement, explicitly (void)ing its
  * argument. */
 #define STMT_VOID(a) while (0) { (void)(a); }
 
 #ifdef __GNUC__
-/** STMT_BEGIN and STMT_END are used to wrap blocks inside macros so that
+/* STMT_BEGIN and STMT_END are used to wrap blocks inside macros so that
  * the macro can be used as if it were a single C statement. */
 #define STMT_BEGIN (void) ({
 #define STMT_END })
@@ -81,7 +90,7 @@ km_onerr_nil(int err, char *file, int line)
     (void) (line);
 }
 
-/* Valid non-function to pass to libkdm functions */
+/* Function to pass to libkdm functions which prints out errors to stderr */
 static void
 km_onerr_print(int err, char *file, int line)
 {
