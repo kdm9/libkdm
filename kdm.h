@@ -98,7 +98,8 @@ static void
 km_onerr_print (int err, char *msg,  char *file, int line)
 {
     if (msg == NULL) {
-        fprintf(stderr, "[%s: %d] %d: %s\n", file, line, err);
+        fprintf(stderr, "[%s: %d] %d: %s\n", file, line, err,
+                km_err_msgs[err]);
         (void) (msg);
     } else {
         fprintf(stderr, "[%s: %d] %d: %s -- %s\n", file, line, err,
@@ -212,7 +213,8 @@ km_readline_realloc_ (char *buf, FILE *fp, size_t *size,
     size_t len = 0;
     while((buf[len] = fgetc(fp)) != EOF && buf[len++] != '\n') {
         if (len + 1 >= (*size) - 1) {
-            (*size) = kmroundupz(*size);
+            size_t newsize = kmroundupz((*size));
+            *size = newsize;
             char * newbuf = km_realloc(buf, sizeof(*buf) * (*size), onerr);
             buf = newbuf;
         }
