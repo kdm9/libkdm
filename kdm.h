@@ -72,6 +72,8 @@ static const char *km_err_msgs[] = {
     "No Error",
     "Could not allocate memory",
     "Could not free memory",
+    "Null pointer passed to function expecting valid memory address",
+    "Bad path passed to function expecting valid filesystem path",
     NULL
 };
 
@@ -83,18 +85,25 @@ static const char *km_err_msgs[] = {
 
 /* Valid non-function to pass to libkdm functions */
 static void
-km_onerr_nil(int err, char *file, int line)
+km_onerr_nil(int err, char *msg, char *file,  int line)
 {
     (void) (err);
+    (void) (msg);
     (void) (file);
     (void) (line);
 }
 
 /* Function to pass to libkdm functions which prints out errors to stderr */
 static void
-km_onerr_print(int err, char *file, int line)
+km_onerr_print (int err, char *msg,  char *file, int line)
 {
-    fprintf(stderr, "[%s: %d] %d: %s\n", file, line, err, km_err_msgs[err]);
+    if (msg == NULL) {
+        fprintf(stderr, "[%s: %d] %d: %s\n", file, line, err);
+        (void) (msg);
+    } else {
+        fprintf(stderr, "[%s: %d] %d: %s -- %s\n", file, line, err,
+                km_err_msgs[err], msg);
+    }
 }
 
 /*
@@ -102,11 +111,12 @@ km_onerr_print(int err, char *file, int line)
  */
 
 static inline void *
-km_calloc_(size_t n, size_t size, void (*onerr)(int, char *, int), char *file, int line)
+km_calloc_ (size_t n, size_t size, void (*onerr)(int, char *, char *, int),
+            char *file, int line)
 {
     void * ret = calloc(n, size);
     if (ret == NULL) {
-        (*onerr)(1, file, line);
+        (*onerr)(1, NULL, file, line);
         return NULL;
     } else {
         return ret;
@@ -115,11 +125,11 @@ km_calloc_(size_t n, size_t size, void (*onerr)(int, char *, int), char *file, i
 #define km_calloc(n, sz, fn) km_calloc_(n, sz, fn, __FILE__, __LINE__)
 
 static inline void *
-km_malloc_(size_t size, void (*onerr)(int, char *, int), char *file, int line)
+km_malloc_ (size_t size, void (*onerr)(int, char *, char *, int), char *file, int line)
 {
     void * ret = malloc(size);
     if (ret == NULL) {
-        (*onerr)(1, file, line);
+        (*onerr)(1, NULL, file, line);
         return NULL;
     } else {
         return ret;
@@ -128,11 +138,12 @@ km_malloc_(size_t size, void (*onerr)(int, char *, int), char *file, int line)
 #define km_malloc(sz, fn) km_malloc_(sz, fn, __FILE__, __LINE__)
 
 static inline void *
-km_realloc_(void *data, size_t size, void (*onerr)(int, char *, int), char *file, int line)
+km_realloc_ (void *data, size_t size, void (*onerr)(int, char *, char *, int),
+             char *file, int line)
 {
     void * ret = realloc(data, size);
     if (ret == NULL) {
-        (*onerr)(1, file, line);
+        (*onerr)(1, NULL, file, line);
         return NULL;
     } else {
         return ret;
