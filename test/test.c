@@ -116,11 +116,62 @@ test_km_free(void *ptr)
     km_free(dat, &km_onerr_nil);
     tt_ptr_op(dat, ==, NULL);
     /* This free(NULL) should not fail */
-    km_free(dat, &tst_err_handler);
+    km_free(dat, &test_err_handler);
     tt_ptr_op(dat, ==, NULL);
 end:
     ;
 }
+
+void
+test_kmroundup32 (void *ptr)
+{
+    int32_t val = 3;
+    tt_int_op(kmroundup32(val), ==, 4);
+    val++;
+    tt_int_op(kmroundup32(val), ==, 8);
+    val++;
+    tt_int_op(kmroundup32(val), ==, 16);
+    val++;
+    tt_int_op(kmroundup32(val), ==, 32);
+    val = 262143;
+    tt_int_op(kmroundup32(val), ==, 262144);
+    /* Bored now, lets assume it works until: */
+    val = (1<<30) + 1;
+    tt_int_op(kmroundup32(val), ==, -2147483648); /* It's signed, remember. Overflows */
+    uint32_t uval = (1u<<31) - 1;
+    tt_int_op(kmroundup32(uval), ==, 1u<<31);
+    uval++;
+    tt_int_op(kmroundup32(uval), ==, 0);
+end:
+    ;
+}
+
+void
+test_kmroundup64 (void *ptr)
+{
+    int64_t val = 3;
+    tt_int_op(kmroundup64(val), ==, 4);
+    val++;
+    tt_int_op(kmroundup64(val), ==, 8);
+    val++;
+    tt_int_op(kmroundup64(val), ==, 16);
+    val++;
+    tt_int_op(kmroundup64(val), ==, 32);
+    val = 262143llu;
+    tt_int_op(kmroundup64(val), ==, 262144);
+    /* Bored now, lets assume it works until: */
+    val = (1llu<<62) + 1;
+    tt_int_op(kmroundup64(val), ==, -9223372036854775808llu); /* It's signed, remember. Overflows */
+    uint64_t uval = (1llu<<63) - 1;
+    tt_int_op(kmroundup64(uval), ==, 1llu<<63);
+    uval++;
+    tt_int_op(kmroundup64(uval), ==, 0);
+    uval = 63llu;
+    tt_int_op(kmroundup64(uval) - 2, ==, 62llu);
+end:
+    ;
+}
+
 /* List of tests. Don't forget to update this.
    Format is:
    { name, fn, flags, testcase_setup_t *ptr, void * for testcase_setup_t }
@@ -130,6 +181,8 @@ struct testcase_t tests[] = {
     { "km_malloc", test_km_malloc,},
     { "km_realloc", test_km_realloc,},
     { "km_free", test_km_free,},
+    { "kmroundup32", test_kmroundup32,},
+    { "kmroundup64", test_kmroundup64,},
     END_OF_TESTCASES
 };
 

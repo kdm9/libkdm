@@ -159,4 +159,37 @@ km_realloc_ (void *data, size_t size, void (*onerr)(int, char *, char *, int),
     }                               \
     STMT_END
 
+/*
+ * Bit fiddling and maths hacks
+ */
+
+
+/* Flogged from http://stackoverflow.com/a/1322548 and
+   http://graphics.stanford.edu/~seander/bithacks.html, and kseq.h */
+/* Round a 32-bit int up to nearest base-2 number */
+#define	kmroundup32(v) (            \
+        --(v),                      \
+        (v)|=(v)>>1,                \
+        (v)|=(v)>>2,                \
+        (v)|=(v)>>4,                \
+        (v)|=(v)>>8,                \
+        (v)|=(v)>>16,               \
+        ++(v))
+/* Round a 64-bit int up to nearest base-2 number */
+#define	kmroundup64(v) (            \
+        --(v),                      \
+        (v)|=(v)>>1,                \
+        (v)|=(v)>>2,                \
+        (v)|=(v)>>4,                \
+        (v)|=(v)>>8,                \
+        (v)|=(v)>>16,               \
+        (v)|=(v)>>32,               \
+        ++(v))
+
+#if UINTPTR_MAX == 0xffffffffffffffff
+#define kmroundupz kmroundup64
+#elif UINTPTR_MAX == 0xffffffff
+#define kmroundupz kmroundup32
+#endif
+
 #endif /* KDM_H */
