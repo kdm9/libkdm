@@ -135,7 +135,8 @@ km_calloc_ (size_t n, size_t size, void (*onerr)(int, char *, char *, int),
 #define km_calloc(n, sz, fn) km_calloc_(n, sz, fn, __FILE__, __LINE__)
 
 static inline void *
-km_malloc_ (size_t size, void (*onerr)(int, char *, char *, int), char *file, int line)
+km_malloc_ (size_t size, void (*onerr)(int, char *, char *, int),
+            char *file, int line)
 {
     void * ret = malloc(size);
     if (ret == NULL) {
