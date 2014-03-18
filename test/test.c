@@ -34,11 +34,11 @@
 #include "testdata.h"
 
 /* Constants */
-#define NUM_ZEROS 1<<10
-static const unsigned char *zeros[NUM_ZEROS];
-static const char *test_data_dir = "." km_pathsep "data";
 static const size_t bufsize = 1<<10;
+static const unsigned char *zeros[1<<10];
+static const char *test_data_dir = "." km_pathsep "data";
 
+/* Helper functions */
 char *
 get_test_filename (const char* file)
 {
@@ -49,7 +49,9 @@ get_test_filename (const char* file)
 }
 
 static int km_test_err = 0;
+static int km_test_exit = 0;
 static char *km_test_err_msg;
+
 void
 test_err_handler(int err, char *msg,  char *f, int l)
 {
@@ -59,6 +61,13 @@ test_err_handler(int err, char *msg,  char *f, int l)
     (void) (l);
 }
 
+void
+test_exit(int val)
+{
+    km_test_exit = val;
+}
+
+/* Actual tests */
 void
 test_km_calloc(void *ptr)
 {
@@ -288,6 +297,7 @@ struct testgroup_t kdm_tests[] = {
 int
 main (int argc, const char *argv[])
 {
-    bzero(zeros, NUM_ZEROS);
+    km_exit = &test_exit;
+    bzero(zeros, bufsize);
     return tinytest_main(argc, argv, kdm_tests);
 } /* ----------  end of function main  ---------- */
