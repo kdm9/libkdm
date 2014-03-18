@@ -82,6 +82,7 @@ static const char *km_err_msgs[] = {
  * Error handling functions
  */
 
+static void (*km_exit)(int) = &exit;
 
 /* Valid non-function to pass to libkdm functions */
 static void
@@ -100,11 +101,19 @@ km_onerr_print (int err, char *msg,  char *file, int line)
     if (msg == NULL) {
         fprintf(stderr, "[%s: %d] %d: %s\n", file, line, err,
                 km_err_msgs[err]);
-        (void) (msg);
     } else {
         fprintf(stderr, "[%s: %d] %d: %s -- %s\n", file, line, err,
                 km_err_msgs[err], msg);
     }
+}
+
+/* Function to pass to libkdm functions which prints out errors to stderr and
+   calls `exit(EXIT_FAILURE)` */
+static void
+km_onerr_print_exit (int err, char *msg,  char *file, int line)
+{
+    km_onerr_print(err, msg, file, line);
+    (*km_exit)(EXIT_FAILURE);
 }
 
 /*
