@@ -218,7 +218,7 @@ test_km_readline_realloc (void *ptr)
         smallbuf = calloc(our_smallbuf_len, sizeof(*smallbuf));
     }
     for (line_num = 0; line_num < n_loremipsum_lines; line_num++) {
-        ret = km_readline_realloc(buf, fp, &our_bufsize, &test_err_handler);
+        ret = km_readline_realloc(&buf, fp, &our_bufsize, &test_err_handler);
         tt_int_op(km_test_err, ==, 0);
         tt_int_op(strncmp(buf, loremipsum_lines[line_num], our_bufsize), ==, 0);
         tt_int_op(strlen(buf), ==, loremipsum_line_lens[line_num]);
@@ -226,7 +226,7 @@ test_km_readline_realloc (void *ptr)
         tt_int_op(our_bufsize, ==, bufsize);
         km_test_err = 0;
     }
-    ret = km_readline_realloc(buf, fp, &our_bufsize, &test_err_handler);
+    ret = km_readline_realloc(&buf, fp, &our_bufsize, &test_err_handler);
     tt_int_op(km_test_err, ==, 0);
     /* check it leaves  \0 in buf */
     tt_int_op(strncmp(buf, "", our_bufsize), ==, 0);
@@ -237,26 +237,26 @@ test_km_readline_realloc (void *ptr)
     /* Naughty tests that try and make it fail */
     rewind(fp);
     /* Null buf */
-    ret = km_readline_realloc(nulcp, fp, &our_bufsize, &test_err_handler);
+    ret = km_readline_realloc(&nulcp, fp, &our_bufsize, &test_err_handler);
     tt_int_op(km_test_err, ==, 3);
     tt_int_op(ret, ==, -2);
     tt_int_op(our_bufsize, ==, bufsize);
     km_test_err = 0;
     /* Null fp */
-    ret = km_readline_realloc(buf, nulfp, &our_bufsize, &test_err_handler);
+    ret = km_readline_realloc(&buf, nulfp, &our_bufsize, &test_err_handler);
     tt_int_op(km_test_err, ==, 3);
     tt_int_op(ret, ==, -2);
     tt_int_op(our_bufsize, ==, bufsize);
     km_test_err = 0;
     /* Both buf & fp null */
-    ret = km_readline_realloc(nulcp, nulfp, &our_bufsize, &test_err_handler);
+    ret = km_readline_realloc(&nulcp, nulfp, &our_bufsize, &test_err_handler);
     tt_int_op(km_test_err, ==, 3);
     tt_int_op(ret, ==, -2);
     tt_int_op(our_bufsize, ==, bufsize);
     km_test_err = 0;
     /* Test that should require it to resize the buffer */
     rewind(fp);
-    ret = km_readline_realloc(smallbuf, fp, &our_smallbuf_len,
+    ret = km_readline_realloc(&smallbuf, fp, &our_smallbuf_len,
             &test_err_handler);
     tt_int_op(km_test_err, ==, 0);
     tt_int_op(ret, ==, loremipsum_line_lens[0]);
