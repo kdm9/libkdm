@@ -133,10 +133,10 @@ test_km_free(void *ptr)
     char *dat = strdup("test");
     /* Test freeing buffer */
     tt_ptr_op(dat, !=, NULL);
-    km_free(dat, &km_onerr_nil);
+    km_free(dat);
     tt_ptr_op(dat, ==, NULL);
     /* This free(NULL) should not fail */
-    km_free(dat, &test_err_handler);
+    km_free(dat);
     tt_ptr_op(dat, ==, NULL);
 end:
     ;
