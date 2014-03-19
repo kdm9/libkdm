@@ -233,23 +233,25 @@ km_realloc_ (void *data, size_t size, void (*onerr)(int, char *, char *, int),
     DON'T USE ON STACK BUFFERS.
 */
 static inline ssize_t
-km_readline_realloc_ (char *buf, FILE *fp, size_t *size,
+km_readline_realloc_ (char **buf, FILE *fp, size_t *size,
               void (*onerr)(int, char *, char *, int), char *file, int line)
 {
-    if (buf == NULL || fp == NULL) {
+    if (buf == NULL || (*buf) == NULL || fp == NULL || size == NULL) {
         (*onerr)(3, NULL, file, line);
         return -2; /* EOF is normally == -1, so use -2 to differentiate them */
     }
     size_t len = 0;
-    while((buf[len] = fgetc(fp)) != EOF && buf[len++] != '\n') {
-        if (len + 1 >= (*size) - 1) {
-            size_t newsize = kmroundupz((*size));
-            *size = newsize;
-            char * newbuf = km_realloc(buf, sizeof(*buf) * (*size), onerr);
-            buf = newbuf;
+    while(((*buf)[len] = fgetc(fp)) != EOF && (*buf)[len++] != '\n') {
+        while (len + 1 >= (*size) - 1) {
+            size_t newsize = (*size) + 1;
+            *size = kmroundupz(newsize);
+            char *newbuf = km_realloc(*buf, sizeof(**buf) * (*size), onerr);
+            if (newbuf == NULL) {
+                return -2;
+            } else (*buf) = newbuf;
         }
     }
-    buf[len] = '\0';
+    (*buf)[len] = '\0';
     if (feof(fp)) return EOF;
     else return len;
 }
