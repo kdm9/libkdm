@@ -124,7 +124,7 @@ static inline void *
 km_calloc_ (size_t n, size_t size, void (*onerr)(int, char *, char *, int),
             char *file, int line)
 {
-    void * ret = calloc(n, size);
+    void *ret = calloc(n, size);
     if (ret == NULL) {
         (*onerr)(1, NULL, file, line);
         return NULL;
@@ -138,7 +138,7 @@ static inline void *
 km_malloc_ (size_t size, void (*onerr)(int, char *, char *, int),
             char *file, int line)
 {
-    void * ret = malloc(size);
+    void *ret = malloc(size);
     if (ret == NULL) {
         (*onerr)(1, NULL, file, line);
         return NULL;
@@ -152,7 +152,7 @@ static inline void *
 km_realloc_ (void *data, size_t size, void (*onerr)(int, char *, char *, int),
              char *file, int line)
 {
-    void * ret = realloc(data, size);
+    void *ret = realloc(data, size);
     if (ret == NULL) {
         (*onerr)(1, NULL, file, line);
         return NULL;
