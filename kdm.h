@@ -162,7 +162,7 @@ km_realloc_ (void *data, size_t size, void (*onerr)(int, char *, char *, int),
 }
 #define km_realloc(ptr, sz, fn) km_realloc_(ptr, sz, fn, __FILE__, __LINE__)
 
-#define km_free(data, onerr)        \
+#define km_free(data)               \
     STMT_BEGIN                      \
     if (data != NULL) {             \
         free(data);                 \
