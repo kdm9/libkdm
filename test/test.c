@@ -111,11 +111,12 @@ void
 test_km_realloc(void *ptr)
 {
     char *res = NULL;
-    char *dat = strdup("test");
+    const char *str = "test";
+    char *dat = strdup(str);
     /* Test resizing buffer */
     res = km_realloc(dat, 10, &km_onerr_nil);
     tt_ptr_op(res, !=, NULL);
-    tt_int_op(memcmp(res, dat, 5), ==, 0);
+    tt_int_op(memcmp(res, str, 5), ==, 0);
     free(res);
     /* This should fail */
     res = km_realloc(dat, SIZE_MAX, &test_err_handler);
