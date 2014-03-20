@@ -61,6 +61,14 @@
 #define STMT_END } while (0)
 #endif
 
+
+/*
+ * General helper macros
+ */
+#define km_likely(x)      __builtin_expect(!!(x), 1)
+#define km_unlikely(x)    __builtin_expect(!!(x), 0)
+
+
 /*
  * Error handling constants
  */
